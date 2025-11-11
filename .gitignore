@@ -1,0 +1,77 @@
+# ============================================
+# ARCHIVO GITIGNORE - Laravel + Angular
+# ============================================
+
+# --- Laravel / PHP ---
+/vendor/
+/node_modules/
+/bootstrap/cache/
+/storage/*.key
+/storage/app/public/*
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/storage/logs/*
+.env
+.env.*
+.phpunit.result.cache
+Homestead.yaml
+Homestead.json
+/.idea
+/.vscode
+/public/storage
+/public/hot
+/public/build
+/public/mix-manifest.json
+
+# --- Composer / PHP ---
+composer.lock
+composer.phar
+
+# --- Logs / Cache / Temporary ---
+*.log
+*.cache
+*.tmp
+*.bak
+*.swp
+*.swo
+
+# --- OS files ---
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# --- Node / Angular ---
+/my-angular-app/node_modules/
+/my-angular-app/dist/
+/my-angular-app/.angular/cache/
+/my-angular-app/.angular/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# --- IDEs ---
+.vscode/
+.idea/
+*.code-workspace
+
+# --- Tests ---
+/coverage/
+/.phpunit.cache
+
+# --- Backup or temp files ---
+*.sql
+*.sqlite
+*.zip
+*.tar
+*.gz
+*.rar
+*.7z
+
+# --- Vite / Build tools ---
+/public/build/
+/public/hot
+vite.config.ts.timestamp-*
+vite.config.js.timestamp-*
