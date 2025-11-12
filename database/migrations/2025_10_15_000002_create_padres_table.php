@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('padres', function (Blueprint $table) {
             $table->id(); // BIGINT PK 
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade'); // FK a users
+            $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
             $table->string('nombre'); // nom del padre
             $table->string('apellido'); // Apellido
             $table->string('numero'); // Número de contacto

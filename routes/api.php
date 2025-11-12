@@ -49,7 +49,7 @@ Route::get('/cursos', function () {
     $cursos = Curso::all();
     return response()->json($cursos);
 });
-
+    
 
 Route::get('/estudiantes', function () {
     // traer todos los estudiantes junto con su curso y padre
@@ -238,50 +238,90 @@ Route::delete('/faltas/{texto}', function ($texto, Request $request) {
 });
 
 
-// creo estudiante
+
 Route::post('/estudiantes', function (Request $request) {
     Log::info('Datos recibidos al crear estudiante:', $request->all());
 
-    //extraigo IDs numericos del texto por ejemplo
-    $cursoId = null;
-    $padreId = null;
+    // procesar datos del padre
+    // ======================================================
+    $padreNombreCompleto = null;
+    $padreNumero = null;
 
-    if (!empty($request->curso_id)) {
-        preg_match('/^\d+/', $request->curso_id, $matchCurso);
-        $cursoId = $matchCurso[0] ?? null;
+    if (!empty($request->padreDatos)) {
+        // Ejemplo: "benita rios 67894532"
+        $partesPadre = explode(' ', trim($request->padreDatos));
+        $padreNumero = array_pop($partesPadre); // último valor = número
+        $padreNombreCompleto = implode(' ', $partesPadre);
     }
 
-    if (!empty($request->padre_id)) {
-        preg_match('/^\d+/', $request->padre_id, $matchPadre);
-        $padreId = $matchPadre[0] ?? null;
+    $padre = null;
+    if ($padreNombreCompleto) {
+        // busco si ya existe por nombre y numero
+        $padre = Padre::where('nombre', 'LIKE', "%$padreNombreCompleto%")
+                      ->where('numero', $padreNumero)
+                      ->first();
+
+        if (!$padre) {
+            // separo nombre y apellido si hay al menos dos palabras
+            $partes = explode(' ', $padreNombreCompleto);
+            $padreNombre = ucfirst(array_shift($partes));
+            $padreApellido = count($partes) ? implode(' ', $partes) : 'N/A';
+
+            $padre = Padre::create([
+                'nombre' => $padreNombre,
+                'apellido' => $padreApellido,
+                'numero' => $padreNumero ?? 'N/A',
+                'user_id' => auth()->id() ?? null,
+            ]);
+
+            Log::info('Padre creado automáticamente:', ['id' => $padre->id]);
+        } else {
+            Log::info('Padre existente encontrado:', ['id' => $padre->id]);
+        }
     }
 
-    // cambio valores en el request para la validacion
-    $request->merge([
-        'curso_id' => $cursoId,
-        'padre_id' => $padreId,
-    ]);
+    // procesar datos del curso
+    // ======================================================
+    $cursoNombre = null;
+    $nombreAsesor = null;
 
-    //validacion
+    if (!empty($request->cursoDatos)) {
+        // por ejempo 5 secun. Pedro Dominguez
+        // inteto dividir en dos partes: curso y asesor
+        $partes = explode('.', $request->cursoDatos, 2);
+        $cursoNombre = trim($partes[0] ?? 'Sin nombre');
+        $nombreAsesor = trim($partes[1] ?? 'Sin asignar');
+    }
+
+    $curso = null;
+    if ($cursoNombre) {
+        $curso = Curso::where('nombre', 'LIKE', "%$cursoNombre%")
+                      ->first();
+
+        if (!$curso) {
+            $curso = Curso::create([
+                'nombre' => $cursoNombre,
+                'nombre_asesor' => $nombreAsesor ?: 'Sin asignar',
+            ]);
+
+            Log::info('Curso creado automáticamente:', ['id' => $curso->id]);
+        } else {
+            Log::info('Curso existente encontrado:', ['id' => $curso->id]);
+        }
+    }
+
+    // valido estudiante y crear
+    // ======================================================
     $validated = $request->validate([
-        'curso_id'  => 'required|exists:cursos,id',
-        'padre_id'  => 'nullable|exists:padres,id',
         'nombre'    => 'required|string|max:100',
         'apellido'  => 'required|string|max:100',
         'numero'    => 'required|string|max:20',
-    ], [
-        'curso_id.required' => 'Debe seleccionar un curso.',
-        'curso_id.exists'   => 'El curso seleccionado no existe.',
-        'padre_id.exists'   => 'El padre seleccionado no existe.',
-        'nombre.required'   => 'El nombre es obligatorio.',
-        'apellido.required' => 'El apellido es obligatorio.',
-        'numero.required'   => 'El número de contacto es obligatorio.',
     ]);
 
     try {
         $estudiante = Estudiante::create([
-            'curso_id'  => $validated['curso_id'],
-            'padre_id'  => $validated['padre_id'] ?? null,
+            'curso_id'  => $curso?->id,
+            'padre_id'  => $padre?->id,
             'nombre'    => $validated['nombre'],
             'apellido'  => $validated['apellido'],
             'numero'    => $validated['numero'],
