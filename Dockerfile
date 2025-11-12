@@ -15,6 +15,11 @@ WORKDIR /var/www
 # Copiar los archivos del proyecto
 COPY . .
 
+# Crear directorios que Laravel necesita y dar permisos
+RUN mkdir -p bootstrap/cache storage \
+    && chown -R www-data:www-data bootstrap/cache storage \
+    && chmod -R 775 bootstrap/cache storage
+
 # Instalar dependencias de Laravel
 RUN composer install --no-interaction --optimize-autoloader --no-dev
 

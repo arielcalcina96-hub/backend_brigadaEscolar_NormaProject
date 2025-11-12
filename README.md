@@ -71,3 +71,7 @@ php artisan serve --host=0.0.0.0 --port=8000
 
 ## construir la imagen de docker en el proyecto 
 docker build -t backend-brigadaescolar .
+
+
+## para probar la imagen de docker localmente
+docker run -p 8000:8000 backend-brigadaescolar
