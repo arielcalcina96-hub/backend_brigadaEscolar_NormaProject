@@ -67,3 +67,7 @@ php artisan make:migration <nombre_archivo>
 
 ### levantar mi backend en toda red local recordar que tambien se debe habilitar el puerto 8000 en el firewall
 php artisan serve --host=0.0.0.0 --port=8000
+
+
+## construir la imagen de docker en el proyecto 
+docker build -t backend-brigadaescolar .
